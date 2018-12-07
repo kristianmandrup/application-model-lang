@@ -1,29 +1,64 @@
 # Domain model
 
-```
-domains {
-    Base {
-        models {
-            fields {
-                id: string,
-            }
-        }
-    },
-    User
-}
-```
-
 ## Base
 
 `domains/Base.hre`
 
 ```
 domain Base {
-    models
+    models // implicit : models
 }
 ```
 
 ### Base models
+
+`base-model.aml`
+
+```
+model Base {
+    extends: base,
+    createdAt: {
+        type: date,
+        generate: onCreate
+    },
+    updatedAt: {
+        type: date,
+        generate: onUpdate
+    }
+}
+```
+
+`mongo-model.aml`
+
+```
+model mongo {
+        extends: db,
+        fields {
+            id: {
+                type: string,
+                generated,
+                primary
+            }
+        }
+    },
+```
+
+`postgres-model.aml`
+
+```
+record postgres {
+    extends: db,
+    fields {
+        id: {
+            type: int,
+            generated,
+            primary
+        }
+    }
+}
+```
+
+`base-models.aml`
 
 ```
 models Base {
@@ -32,148 +67,172 @@ models Base {
             id: string,
         }
     },
-    db {
-        extends: base,
-        createdAt: {
-            type: date,
-            generate: onCreate
-        },
-        updatedAt: {
-            type: date,
-            generate: onUpdate
-        }
-    },
-    mongo {
-        extends: db,
-        fields {
-            id: {
-                type: string,
-                generated,
-                primary
-            }
-        }
-    },
-    postgres {
-        extends: db,
-        fields {
-            id: {
-                type: int,
-                generated,
-                primary
-            }
-        }
-    }
+    db, // implicit : db
+    mongo,
+    postgres
 }
 ```
 
 ## User
 
-`domains/User.hre`
+`domains/user.hre`
 
 ```
 domain User {
     extends: Base,
     // for DB
     models: User
-    forms: User
-    display User
+    forms, // implicit User
+    display
 }
 ```
 
-### User forms
+### Forms
+
+#### Base
+
+```
+form User:base {
+    fields {
+        extends: models.base
+    },
+    render {
+        name: <text-input>,
+        email: <text-input>
+    },
+    validate: onSubmit
+},
+```
+
+#### Update
+
+```
+form User:update {
+    extends: Base,
+    validate: {
+        field: onChange
+    }
+},
+```
+
+#### Create
+
+`confirm-password-field.aml`
+
+```
+field confirmPassword {
+    transient,
+    type: string,
+    render: <password-input>,
+    validate: sameAs('password')
+}
+```
+
+`accept-legal.aml`
+
+```
+field acceptLegal {
+    transient,
+    type: string,
+    render: <checkbox>,
+    validate: {
+        validators {
+            isChecked
+        }
+    }
+}
+```
+
+```
+form User:create {
+    extends: Base,
+    fields {
+        confirmPassword,
+        acceptLegal
+    },
+    actions {
+        submit {
+            enable {
+                validated
+            }
+        }
+    },
+    triggers {
+        onCreate: setToken(self)
+    }
+}
+```
+
+### All User Forms
 
 ```
 forms User {
-    Base {
-        fields {
-            extends: models.base
-        },
-        render {
-            name: <text-input>,
-            email: <text-input>
-        },
-        validate: onSubmit
-    },
-    Update {
-        extends: Base,
-        validate: {
-            field: onChange
-        }
-    },
-    Create {
-        extends: Base,
-        fields {
-            confirmPassword: {
-                transient,
-                type: string,
-                render: <password-input>,
-                validate: sameAs('password')
-            },
-            acceptLegal: {
-                transient,
-                type: string,
-                render: <checkbox>,
-                validate: {
-                    validators {
-                        isChecked
-                    }
-                }
-            }
-        },
-        actions {
-            submit {
-                enable {
-                    validated
-                }
-            }
-        },
-        triggers {
-            onCreate: setToken(self)
-        }
-    }
+    base,
+    update,
+    create
 }
 ```
 
 ### User display
 
+- one
+- many
+
+#### Single user display
+
 ```
-display User {
-    single {
+display User:single {
+    fields: {
         extends: models.base
     },
-    list {
-        item {
-            fields {
-                avatar {
-                    thumbnail: small
-                },
-                name: <caption>,
-                email: <mailto-link>
+    // ...
+}
+```
+
+#### List of users display
+
+```
+display User:many {
+    item {
+        fields {
+            avatar {
+                thumbnail: small
             },
-            actions {
-                update {
-                    display {
-                        form: update
-                    }
-                },
-                delete {
-                    confirm
-                }
-            }
+            name: <caption>,
+            email: <mailto-link>
         },
-        items {
-            paginate {
-                pageSize: 20
+        actions {
+            update {
+                display {
+                    form: update
+                }
             },
-            actions {
-                create {
-                    display {
-                        form: register
-                    }
+            delete {
+                confirm
+            }
+        }
+    },
+    items {
+        paginate {
+            pageSize: 20
+        },
+        actions {
+            create {
+                display {
+                    form: register
                 }
             }
         }
     }
+}
+```
+
+#### All User displays
+
+```
+displays User {
+    one,
+    many
 }
 ```
 

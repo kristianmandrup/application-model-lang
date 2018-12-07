@@ -14,27 +14,27 @@ TODO
 `Counter.recomp`
 
 ```
-component Counter {
-  props {
-    initial = 0
-  },
-  states {
-    count: {
-      initial,
-      value: count#int,
-      action: setCount,
-      mutators: {
-        counter: createCounter(count, setCount)
-      },
-      triggers {
-        Increase {
-          target: counter
-          action: Add(1)
-        }
-      },
-    }
-  },
-  render {
+state Count(initial) {
+    initial,
+    value: count#int,
+    action: setCount,
+    mutators: {
+      counter: createCounter(count, setCount)
+    },
+    triggers {
+      Increase {
+        target: counter
+        action: Add(1)
+      }
+    },
+  }
+},
+```
+
+Render factory
+
+```
+render DisplayCounter(Increase, count) {
     <div> {
       count,
       <button> {
@@ -43,6 +43,19 @@ component Counter {
       }
     }
   }
+```
+
+Counter component
+
+```
+component Counter {
+  props {
+    initial = 0
+  },
+  states {
+    count: Count(initial)
+  },
+  render: DisplayCounter(Increase, count)
 }
 ```
 

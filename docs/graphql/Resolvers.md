@@ -3,26 +3,31 @@
 ## Base resolvers
 
 ```
-resolvers Base {
-    query {
-        base {
-            execute {
-                args {
-                    validate {
-                        onError {
-                            trigger: invalid
-                        }
-                    }
-                },
-                model {
-                    fetch {
-                        onError {
-                            trigger: error
-                        }
-                    }
+resolver:query base {
+    execute {
+        args {
+            validate {
+                onError {
+                    trigger: invalid
                 }
             }
         },
+        model {
+            fetch {
+                onError {
+                    trigger: error
+                }
+            }
+        }
+    }
+},
+```
+
+### All resolvers
+
+```
+resolvers Base {
+    queries {
         own {
             fields {
             },

@@ -20,7 +20,28 @@ application WebShop {
 - [Fields](./docs/Fields.md)
 - [Infrastructure](./docs/Infrastructure.md)
 - [Components](./docs/components/Component.md)
+- [GraphQL](./docs/graphql/GraphQL.md)
 
-## GraphQL
+## Environments
 
-See [GraphQL](./docs/graphql/GraphQL.md)
+The model should make it easy to create multiple application definitions, such as for:
+
+- dev
+- test
+- staging
+- production
+- feature spike
+- experimental
+- variants
+- ...
+
+### Test setup inheriting from Base setup
+
+```
+application TestWebShop {
+    extends: Webshop,
+    // overrides
+    fields: TestFields,
+    domains: TestDomains,
+}
+```
