@@ -49,6 +49,89 @@ application WebShop#test {
 }
 ```
 
+## Pluggable AST outputter
+
+We would like to be able to generate the final output to support a range of languages, frameworks etc. For this to work, we need a plugin system.
+
+The target environment can then select a number of plugins via installation of npm modules.
+A plugin is a service.
+
+Each service module must have a main file, which when executed starts listening to a given port (default `6226`) for specific AST messages.
+
+The project needs to have a config file which lists the services to be used and executed:
+
+`aml-services.json`
+
+```json
+{
+  "services": {
+    "@aml/reason-typeorm-service": {
+      "template": "default"
+    },
+    "@aml/reason-react-service": {
+      "template": "default"
+    },
+    "@aml/reason-graphql-service": {
+      "template": "./templates/reason-graphql-service"
+    }
+  },
+  "port:: 6226
+}
+```
+
+When a plugin (service) receives an AST of interest, it can process and output one or more files to reflect it. Multiple services can even collaborate by passing messages if needed!
+
+Multiple services can subscribe to the same type of AST node to output multiple files!
+
+We will use [SenecaJS](http://senecajs.org/getting-started/) to have a message based publish/subscribe micro services, where an AST visitor (langaueg server) can broadcast the AST to subscribing services.
+
+The client services can use whatever language or library to listen for AST messages and respond.
+
+### AST client service
+
+```js
+const path = require("path");
+const seneca = require("seneca")();
+
+const service = {
+  name: "reason-typeorm"
+};
+
+seneca.add({ role: "aml", cmd: "domain" }, ({ data }, reply) => {
+  // output domain file
+  const filePath = path.join(projRoot, "models", modelName(data.name));
+  // ...
+
+  // reply domain file was outputted
+  reply(null, { domain: data.name, service });
+});
+```
+
+### AST Server
+
+```js
+const seneca = require("seneca")();
+
+// data =
+// {
+//   type: 'domain',
+//   name: 'Person'
+//   fields: {
+//     name: {
+//       type: 'string'
+//     }
+//   }
+// }
+
+// triggered by AST domain node encountered
+const onDomain = data => {
+  seneca.act({ role: "aml", cmd: "domain", data }, (err, result) => {
+    if (err) handleError(err);
+    handleResult(result);
+  });
+};
+```
+
 ## Parser Generator
 
 [chevrotain](https://github.com/SAP/chevrotain) by [SAP](https://github.com/SAP)
