@@ -1,6 +1,6 @@
 ## Query component
 
-`GetPokemonQuery.hre`
+`GetPokemonQuery.aml`
 
 ```
 component GetPokemonQuery {

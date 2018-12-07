@@ -1,6 +1,6 @@
 # Query
 
-`GetPokemon.hre`
+`GetPokemon.aml`
 
 ```
 query getPokemon($name: String!) {

@@ -1,6 +1,6 @@
 # Infra
 
-`Infra.hre`
+`Infra.aml`
 
 ```
 infra {

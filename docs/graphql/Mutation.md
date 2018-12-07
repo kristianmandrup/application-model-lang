@@ -1,6 +1,6 @@
 # Mutation
 
-`AddPokemon.hre`
+`AddPokemon.aml`
 
 ```
 mutation addPokemon($name: String!) {

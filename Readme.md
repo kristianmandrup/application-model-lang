@@ -1,7 +1,12 @@
-# Higher Reason
+# Application Meta Language
 
-A set of high level language that declares the outline of an application.
-This definition can be used across languages, frameworks etc.
+Also known as `ApplicationML` or Application Model Language.
+
+Declare the outline of your application declaratively. Plugin a set of services for your language/framework preferences. Select specific service templates to be used (such as for customization)
+
+The compiler will then parse the definition, send the AST nodes to subscribing services which "spit out" application artifacts according to your preferences.
+
+    "One ring to rule them all"
 
 - designed to be highly pluggable.
 - will include editor IDE support, initially for VS Code.
@@ -66,28 +71,42 @@ The project needs to have a config file which lists the services to be used and 
 {
   "services": {
     "@aml/reason-typeorm-service": {
-      "template": "default"
+      "templates": "default"
     },
     "@aml/reason-react-service": {
-      "template": "default"
+      "templates": "default"
     },
     "@aml/reason-graphql-service": {
-      "template": "./templates/reason-graphql-service"
+      "templates": "./aml/templates/reason-graphql-service",
+      "structure": "./aml/structure/graphql"
     }
   },
   "port:: 6226
 }
 ```
 
-When a plugin (service) receives an AST of interest, it can process and output one or more files to reflect it. Multiple services can even collaborate by passing messages if needed!
+Note that each service can take configurations such as:
 
-Multiple services can subscribe to the same type of AST node to output multiple files!
+- templates to be used
+- file structure definition to guide outputter where to output files
+- service specific metadata
+
+When a plugin (service) receives an AST of interest, it can process and output one or more files to reflect it. Multiple services can even collaborate by passing messages between each other if needed!
+
+Multiple services can subscribe to the same type of AST node to output multiple files.
+Typical example, a domain form:
+
+- form display/layout
+- form validation
+- form state management
+
+### AST Micro services
 
 We will use [SenecaJS](http://senecajs.org/getting-started/) to have a message based publish/subscribe micro services, where an AST visitor (langaueg server) can broadcast the AST to subscribing services.
 
 The client services can use whatever language or library to listen for AST messages and respond.
 
-### AST client service
+#### AST client service
 
 ```js
 const path = require("path");
@@ -107,7 +126,7 @@ seneca.add({ role: "aml", cmd: "domain" }, ({ data }, reply) => {
 });
 ```
 
-### AST Server
+#### AST Server
 
 ```js
 const seneca = require("seneca")();

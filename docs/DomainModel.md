@@ -2,7 +2,7 @@
 
 ## Base
 
-`domains/Base.hre`
+`domains/Base.aml`
 
 ```
 domain Base {
@@ -75,7 +75,7 @@ models Base {
 
 ## User
 
-`domains/user.hre`
+`domains/user.aml`
 
 ```
 domain User {
