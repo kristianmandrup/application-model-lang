@@ -57,7 +57,11 @@ application WebShop#test {
 yarn add chevrotain
 ```
 
-### Tokens
+### Lexer
+
+[Step 1: Lexing](https://sap.github.io/chevrotain/docs/tutorial/step1_lexing.html)
+
+For the Lexer we need to define the set of valid tokens:
 
 ```js
 const Identifier = createToken({ name: "Identifier", pattern: /[a-zA-Z]\w*/ });
@@ -80,11 +84,22 @@ const Fields = createToken({
   pattern: /fields/,
   longer_alt: Identifier
 });
+const Domains = createToken({
+  name: "Domains",
+  pattern: /domains/,
+  longer_alt: Identifier
+});
 
 // ...
 
 const Comma = createToken({ name: "Comma", pattern: /,/ });
 const Colon = createToken({ name: "Colon", pattern: /:/ });
+const LBrace = createToken({ name: "LBrace", pattern: /{/ });
+const RBrace = createToken({ name: "RBrace", pattern: /}/ });
+const LParens = createToken({ name: "LBrace", pattern: /\(/ });
+const RParens = createToken({ name: "RBrace", pattern: /\)/ });
+const Dot = createToken({ name: "Dot", pattern: /\./ });
+const Anchor = createToken({ name: "Anchor", pattern: /#/ });
 
 const Integer = createToken({ name: "Integer", pattern: /0|[1-9]\d*/ });
 
@@ -107,6 +122,12 @@ let allTokens = [
   Fields,
   Comma,
   Colon,
+  LBrace,
+  RBrace,
+  LParens,
+  RParens,
+  Dot,
+  Anchor,
   // The Identifier must appear after the keywords because all keywords are valid identifiers.
   Identifier,
   Integer
@@ -126,12 +147,23 @@ let lexingResult = AppMlLexer.tokenize(inputText);
 
 ### Parser
 
-```js
-appStatement: appClause
+[Step 2: Parsing](https://sap.github.io/chevrotain/docs/tutorial/step2_parsing.html)
 
-appClause: "application" Identifier  (":" Identifier)? "{" appDef "}"
+```
+appStatement
+  : "application" Identifier  (":" Identifier)? "{" appDef "}"
 
-appDef: //...
+appClause
+  : (extendsClause?, fieldsClause?, domainsClause? )*
+
+extendsClause
+  : "extends" Identifier ("#" Identifier)?
+
+fieldsClause
+  : "fields" Identifier ("#" Identifier)? ("{" fieldDef "}")?
+
+domainsClause
+  : "domains" Identifier ("#" Identifier)? ("{" domainsDef "}")?
 ```
 
 ### Rule
@@ -144,6 +176,8 @@ $.RULE("appStatement", () => {
 });
 ```
 
+The parser could look something like this...
+
 ### AppMl Parser
 
 ```js
@@ -154,10 +188,6 @@ class AppMlParser extends Parser {
     const $ = this;
 
     $.RULE("appStatement", () => {
-      $.SUBRULE($.appClause);
-    });
-
-    $.RULE("appClause", () => {
       $.CONSUME(Application);
       // debug
       debugger;
@@ -167,7 +197,70 @@ class AppMlParser extends Parser {
           $.CONSUME(Identifier);
         }
       });
-      // ...
+
+      // optional
+      $.OPTION(() => {
+        $.SUBRULE($.appClause);
+      });
+    });
+
+    $.RULE("appClause", () => {
+      $.CONSUME(LBrace);
+      // optional
+      $.OPTION(() => {
+        $.SUBRULE($.appDefitions);
+      });
+      $.CONSUME(RBrace);
+    });
+
+    $.RULE("appDefitions", () => {
+      $.AT_LEAST_ONE_SEP({
+        SEP: Comma,
+        DEF: () => {
+          $.CONSUME($.appDef);
+        }
+      });
+    });
+
+    $.RULE("appDef", () => {
+      $.OR([
+        { ALT: () => $.CONSUME($.extendsClause) },
+        { ALT: () => $.CONSUME($.fieldsClause) },
+        { ALT: () => $.CONSUME($.domainsClause) }
+      ]);
+    });
+
+    $.RULE("extendsClause", () => {
+      $.CONSUME(Extends);
+      $.CONSUME(WhiteSpace);
+      $.CONSUME(Identifier);
+      // todo: optional Anchor
+      $.OPTION(() => {
+        $.CONSUME(Anchor);
+        $.CONSUME(Identifier);
+      });
+    });
+
+    $.RULE("fieldsClause", () => {
+      $.CONSUME(Fields);
+      $.CONSUME(WhiteSpace);
+      $.CONSUME(Identifier);
+      // todo: optional Anchor
+      $.OPTION(() => {
+        $.CONSUME(Anchor);
+        $.CONSUME(Identifier);
+      });
+    });
+
+    $.RULE("domainsClause", () => {
+      $.CONSUME(Domains);
+      $.CONSUME(WhiteSpace);
+      $.CONSUME(Identifier);
+      // todo: optional Anchor
+      $.OPTION(() => {
+        $.CONSUME(Anchor);
+        $.CONSUME(Identifier);
+      });
     });
 
     this.performSelfAnalysis();
@@ -265,20 +358,20 @@ output2 = {
 ```js
 // Tree Walker
 export function toAst(cst) {
-    const children = cst.children
-    switch (cst.name) {
-        case "appStatement": {
-            // ...
-        }
-        case "appClause": {
-        // ... more cases
-
-        default: {
-            throw new Error(
-                `CST case handler not implemented for CST node <${cst.name}>`
-            )
-        }
+  const children = cst.children
+  switch (cst.name) {
+    case "appStatement": {
+      // ...
     }
+    case "appClause": {
+    // ... more cases
+
+    default: {
+      throw new Error(
+        `CST case handler not implemented for CST node <${cst.name}>`
+      )
+    }
+  }
 }
 ```
 
@@ -309,3 +402,5 @@ class AppMlToAstVisitor extends BaseCstVisitor {
   // ... more methods
 }
 ```
+
+###
