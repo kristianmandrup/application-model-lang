@@ -143,6 +143,8 @@ field acceptLegal {
 }
 ```
 
+`user-form.aml`
+
 ```
 form User:create {
     extends: Base,
