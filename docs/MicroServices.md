@@ -4,6 +4,9 @@ We will use [SenecaJS](http://senecajs.org/getting-started/) to have a message b
 
 The client services can use whatever language or library to listen for AST messages and respond.
 
+- [Seneca Promise](https://github.com/tswaters/seneca-promise)
+- [Seneca with Promises](http://senecajs.org/docs/tutorials/seneca-with-promises.html)
+
 ## AST client service
 
 `FileWriter.js`
