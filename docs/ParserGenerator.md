@@ -358,18 +358,18 @@ output2 = {
 ```js
 // Tree Walker
 export function toAst(cst) {
-  const children = cst.children
+  const children = cst.children;
   switch (cst.name) {
     case "appStatement": {
       // ...
     }
     case "appClause": {
-    // ... more cases
-
+      // ... more cases
+    }
     default: {
       throw new Error(
         `CST case handler not implemented for CST node <${cst.name}>`
-      )
+      );
     }
   }
 }
