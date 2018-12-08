@@ -4,7 +4,7 @@ const { LCurly, RCurly, Comma, WhiteSpace, Identifier, Anchor } = tokenMap;
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
 export const createUtil = ($: any) => {
-  const createClause = (name: string, subRule: any) => {
+  const createScope = (name: string, subRule: any) => {
     subRule = typeof subRule === "string" ? $[subRule] : subRule;
     $.RULE(name, () => {
       $.CONSUME(LCurly);
@@ -25,19 +25,18 @@ export const createUtil = ($: any) => {
     });
   };
 
-  const createDefClause = (name: string, token: any) =>
+  const createClause = (name: string, token: any) =>
     $.RULE(name, () => {
       $.CONSUME(token);
-      $.CONSUME(WhiteSpace);
       anchorId;
     });
 
   // use convention to enable iteration over collection
-  const createDefClauses = (...names: string[]) =>
+  const createClauses = (...names: string[]) =>
     names.map(name => {
       const className = capitalize(name);
       const token = tokenMap[className];
-      createDefClause(`${name}Clause`, token);
+      createClause(`${name}Clause`, token);
     });
 
   const atLeastOne = (rule: any, sep = Comma) =>
@@ -54,11 +53,11 @@ export const createUtil = ($: any) => {
     });
 
   const eitherOf = (name: string, ...rules: any[]) =>
-    $.RULE("appDef", () => {
+    $.RULE(name, () => {
       $.OR(
-        rules.map(rule => {
-          ALT: () => $.CONSUME(rule);
-        })
+        rules.map(rule => ({
+          ALT: () => $.CONSUME(rule)
+        }))
       );
     });
 
@@ -66,9 +65,9 @@ export const createUtil = ($: any) => {
     eitherOf,
     atLeastOne,
     oneOrMore,
-    createDefClauses,
-    createDefClause,
-    anchorId,
-    createClause
+    createClauses,
+    createClause,
+    createScope,
+    anchorId
   };
 };

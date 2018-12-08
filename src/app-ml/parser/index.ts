@@ -24,19 +24,22 @@ const {
   // Fields
 } = tokenMap;
 
+export const createAppMlParser = (config = {}) => new AppMlParser(config);
+
 export class AppMlParser extends Parser {
-  constructor() {
+  constructor(config = {}) {
     super(tokens, {
-      recoveryEnabled: true
+      recoveryEnabled: true,
+      ...config
     });
 
     const $: any = this;
     const {
       anchorId,
-      createClause,
+      createScope,
       oneOrMore,
       eitherOf,
-      createDefClauses
+      createClauses
     } = createUtil($);
 
     $.RULE("appStatement", () => {
@@ -44,17 +47,17 @@ export class AppMlParser extends Parser {
       anchorId();
       // optional
       $.OPTION(() => {
-        $.SUBRULE($.appClause);
+        $.SUBRULE($.appScope);
       });
     });
 
-    createClause("appClause", $.appDefinitions);
+    createScope("appScope", $.appDefinitions);
 
     eitherOf("appDef", $.extendsClause, $.fieldsClause, $.domainsClause);
 
     oneOrMore("appDefitions", $.appDef);
 
-    createDefClauses("extends", "fields", "domains");
+    createClauses("extends", "fields", "domains");
 
     // $.RULE("json", () => {
     //   $.OR([
