@@ -1,0 +1,20 @@
+{
+  "services": {
+    "typeorm": {
+      "location": "@aml/reason-typeorm-service",
+      "templates": "default"
+    },
+    "reason-react": {
+      "location": "./aml/services/my-reason-react"
+    },
+    "reason-graphql": {
+      "location": "@aml/reason-graphql-service",
+      "templates": "./aml/templates/reason-graphql-service",
+      "structure": "./aml/structure/graphql"
+    }
+  },
+  "settings": {
+    "transport": "websockets",
+    "port": "6226"
+  }
+}

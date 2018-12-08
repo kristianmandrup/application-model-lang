@@ -14,18 +14,24 @@ The project needs to have a config file which lists the services to be used and 
 ```json
 {
   "services": {
-    "@aml/reason-typeorm-service": {
+    "typeorm": {
+      "location": "@aml/reason-typeorm-service",
       "templates": "default"
     },
-    "@aml/reason-react-service": {
-      "templates": "default"
+    "reason-react": {
+      "location": "./aml/services/my-reason-react"
+      // implicit "templates": "default"
     },
-    "@aml/reason-graphql-service": {
+    "reason-graphql": {
+      "location": "@aml/reason-graphql-service",
       "templates": "./aml/templates/reason-graphql-service",
       "structure": "./aml/structure/graphql"
     }
   },
-  "port:: 6226
+  "settings": {
+    "transport": "websockets",
+    "port": "6226"
+  }
 }
 ```
 
