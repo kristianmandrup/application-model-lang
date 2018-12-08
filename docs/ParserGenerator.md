@@ -223,7 +223,7 @@ class AppMlParser extends Parser {
 
     $.RULE("appStatement", () => {
       $.CONSUME(Application);
-      anchorId()
+      anchorId();
       // optional
       $.OPTION(() => {
         $.SUBRULE($.appClause);
@@ -232,9 +232,9 @@ class AppMlParser extends Parser {
 
     createClause("appClause", $.appDefinitions);
 
-    oneOrMore("appDefitions" $.appDef);
+    oneOrMore("appDefitions", $.appDef);
 
-    eitherOf("appDef", $.extendsClause, $.fieldsClause, $.domainsClause)
+    eitherOf("appDef", $.extendsClause, $.fieldsClause, $.domainsClause);
 
     createDefClauses("extends", "fields", "domains");
 

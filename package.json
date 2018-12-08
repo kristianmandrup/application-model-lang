@@ -1,0 +1,39 @@
+{
+  "name": "application-model-lang",
+  "version": "1.0.0",
+  "description": "Application Model language",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kristianmandrup/application-model-lang.git"
+  },
+  "keywords": [
+    "chevrotain",
+    "application",
+    "model",
+    "language",
+    "meta"
+  ],
+  "author": "Kristian Mandrup",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/kristianmandrup/application-model-lang/issues"
+  },
+  "homepage": "https://github.com/kristianmandrup/application-model-lang#readme",
+  "dependencies": {
+    "@types/jest": "^23.3.10",
+    "@types/node": "^10.12.12",
+    "chevrotain": "^4.1.0",
+    "jest": "^23.6.0",
+    "lodash": "^4.17.11",
+    "powerdash": "^1.1.0",
+    "tslint": "^5.11.0",
+    "underscore.string": "^3.3.5"
+  }
+}
