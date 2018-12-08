@@ -63,7 +63,8 @@ const WhiteSpace = createToken({
 
 ```js
 // note we are placing WhiteSpace first as it is very common thus it will speed up the lexer.
-let allTokens = [
+
+const allTokens = [
   WhiteSpace,
   // "keywords" appear before the Identifier
   Application,
@@ -81,6 +82,26 @@ let allTokens = [
   Identifier,
   Integer
 ];
+
+const tokenMap = {
+  WhiteSpace,
+  // "keywords" appear before the Identifier
+  Application,
+  Extends,
+  Fields,
+  Comma,
+  Colon,
+  LBrace,
+  RBrace,
+  LParens,
+  RParens,
+  Dot,
+  Anchor,
+  // The Identifier must appear after the keywords because all keywords are valid identifiers.
+  Identifier,
+  Integer
+};
+
 let AppMlLexer = new Lexer(allTokens);
 ```
 
@@ -129,7 +150,71 @@ The parser could look something like this...
 
 ### AppMl Parser
 
+`parser-util.js`
+
 ```js
+import { LBrace, RBrace, Comma, WhiteSpace, Identifier, Anchor } from './lexer'
+
+const capitalize = (str)  => str.charAt(0).toUpperCase() + str.slice(1);
+
+export const createClause = (name, subRule) => {
+  subRule = typeof subRule === "string" ? $[subRule] : subRule;
+  $.RULE(name, () => {
+    $.CONSUME(LBrace);
+    // optional
+    $.OPTION(() => {
+      $.SUBRULE(subRule);
+    });
+    $.CONSUME(RBrace);
+  });
+};
+
+export const anchorId = () => {
+  $.CONSUME(Identifier);
+  // todo: optional Anchor
+  $.OPTION(() => {
+    $.CONSUME(Anchor);
+    $.CONSUME(Identifier);
+  });
+}
+
+export const createDefClause = (token) =>
+  $.RULE("extendsClause", () => {
+    $.CONSUME(token);
+    $.CONSUME(WhiteSpace);
+    anchorId;
+  });
+
+// use convention to enable iteration over collection
+export const createDefClauses = (...names) => names.map(name => {
+  createDefClause(`${name}Clause`, tokenMap[capitalize(name)]
+})
+
+export const atLeastOne = (rule, sep = Comma) =>
+  $.AT_LEAST_ONE_SEP({
+    SEP: sep,
+    DEF: () => {
+      rule()
+    }
+  });
+
+
+export const oneOrMore = (name, subRule, sep = Comma) =>
+  $.RULE(name, () => {
+    atLeastOne(() => $.CONSUME(subRule))
+  });
+
+const eitherOf = (name, ...rules) => {
+  $.RULE("appDef", () => {
+    $.OR(rules.map(rule => { ALT: () => $.CONSUME(rule) })
+  });
+```
+
+`AppMlParser.js`
+
+```js
+import { createClause, createDefClauses, oneOrMore } from "./parser-util";
+
 class AppMlParser extends Parser {
   constructor() {
     super(allTokens);
@@ -138,79 +223,20 @@ class AppMlParser extends Parser {
 
     $.RULE("appStatement", () => {
       $.CONSUME(Application);
-      // debug
-      debugger;
-      $.AT_LEAST_ONE_SEP({
-        SEP: WhiteSpace,
-        DEF: () => {
-          $.CONSUME(Identifier);
-        }
-      });
-
+      anchorId()
       // optional
       $.OPTION(() => {
         $.SUBRULE($.appClause);
       });
     });
 
-    $.RULE("appClause", () => {
-      $.CONSUME(LBrace);
-      // optional
-      $.OPTION(() => {
-        $.SUBRULE($.appDefitions);
-      });
-      $.CONSUME(RBrace);
-    });
+    createClause("appClause", $.appDefinitions);
 
-    $.RULE("appDefitions", () => {
-      $.AT_LEAST_ONE_SEP({
-        SEP: Comma,
-        DEF: () => {
-          $.CONSUME($.appDef);
-        }
-      });
-    });
+    oneOrMore("appDefitions" $.appDef);
 
-    $.RULE("appDef", () => {
-      $.OR([
-        { ALT: () => $.CONSUME($.extendsClause) },
-        { ALT: () => $.CONSUME($.fieldsClause) },
-        { ALT: () => $.CONSUME($.domainsClause) }
-      ]);
-    });
+    eitherOf("appDef", $.extendsClause, $.fieldsClause, $.domainsClause)
 
-    $.RULE("extendsClause", () => {
-      $.CONSUME(Extends);
-      $.CONSUME(WhiteSpace);
-      $.CONSUME(Identifier);
-      // todo: optional Anchor
-      $.OPTION(() => {
-        $.CONSUME(Anchor);
-        $.CONSUME(Identifier);
-      });
-    });
-
-    $.RULE("fieldsClause", () => {
-      $.CONSUME(Fields);
-      $.CONSUME(WhiteSpace);
-      $.CONSUME(Identifier);
-      // todo: optional Anchor
-      $.OPTION(() => {
-        $.CONSUME(Anchor);
-        $.CONSUME(Identifier);
-      });
-    });
-
-    $.RULE("domainsClause", () => {
-      $.CONSUME(Domains);
-      $.CONSUME(WhiteSpace);
-      $.CONSUME(Identifier);
-      // todo: optional Anchor
-      $.OPTION(() => {
-        $.CONSUME(Anchor);
-        $.CONSUME(Identifier);
-      });
-    });
+    createDefClauses("extends", "fields", "domains");
 
     this.performSelfAnalysis();
   }
