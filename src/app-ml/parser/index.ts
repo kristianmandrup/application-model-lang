@@ -52,11 +52,8 @@ export class AppMlParser extends Parser {
     });
 
     createScope("appScope", $.appDefinitions);
-
     eitherOf("appDef", $.extendsClause, $.fieldsClause, $.domainsClause);
-
     oneOrMore("appDefitions", $.appDef);
-
     createClauses("extends", "fields", "domains");
 
     // $.RULE("json", () => {

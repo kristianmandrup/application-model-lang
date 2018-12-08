@@ -3,7 +3,7 @@ import { AppMlParser as Parser } from "./parser";
 
 export { Lexer, Parser };
 
-const parser: any = new Parser([]);
+const parser: any = new Parser();
 
 export const parse = (text: string) => {
   const lexingResult = Lexer.tokenize(text);

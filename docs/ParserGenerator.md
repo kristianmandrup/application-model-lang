@@ -150,93 +150,115 @@ The parser could look something like this...
 
 ### AppMl Parser
 
-`parser-util.js`
+`parser-util.ts`
 
 ```js
-import { LBrace, RBrace, Comma, WhiteSpace, Identifier, Anchor } from './lexer'
+import { tokenMap } from "../lexer";
+const { LCurly, RCurly, Comma, WhiteSpace, Identifier, Anchor } = tokenMap;
 
-const capitalize = (str)  => str.charAt(0).toUpperCase() + str.slice(1);
+const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
-export const createClause = (name, subRule) => {
-  subRule = typeof subRule === "string" ? $[subRule] : subRule;
-  $.RULE(name, () => {
-    $.CONSUME(LBrace);
-    // optional
-    $.OPTION(() => {
-      $.SUBRULE(subRule);
+export const createUtil = ($: any) => {
+  const createScope = (name: string, subRule: any) => {
+    subRule = typeof subRule === "string" ? $[subRule] : subRule;
+    $.RULE(name, () => {
+      $.CONSUME(LCurly);
+      // optional
+      $.OPTION(() => {
+        $.SUBRULE(subRule);
+      });
+      $.CONSUME(RCurly);
     });
-    $.CONSUME(RBrace);
-  });
-};
+  };
 
-export const anchorId = () => {
-  $.CONSUME(Identifier);
-  // todo: optional Anchor
-  $.OPTION(() => {
-    $.CONSUME(Anchor);
+  const anchorId = () => {
     $.CONSUME(Identifier);
-  });
-}
+    // todo: optional Anchor
+    $.OPTION(() => {
+      $.CONSUME(Anchor);
+      $.CONSUME(Identifier);
+    });
+  };
 
-export const createDefClause = (token) =>
-  $.RULE("extendsClause", () => {
-    $.CONSUME(token);
-    $.CONSUME(WhiteSpace);
-    anchorId;
-  });
+  const createClause = (name: string, token: any) =>
+    $.RULE(name, () => {
+      $.CONSUME(token);
+      anchorId;
+    });
 
-// use convention to enable iteration over collection
-export const createDefClauses = (...names) => names.map(name => {
-  createDefClause(`${name}Clause`, tokenMap[capitalize(name)]
-})
+  // use convention to enable iteration over collection
+  const createClauses = (...names: string[]) =>
+    names.map(name => {
+      const className = capitalize(name);
+      const token = tokenMap[className];
+      createClause(`${name}Clause`, token);
+    });
 
-export const atLeastOne = (rule, sep = Comma) =>
-  $.AT_LEAST_ONE_SEP({
-    SEP: sep,
-    DEF: () => {
-      rule()
-    }
-  });
+  const atLeastOne = (rule: any, sep = Comma) =>
+    $.AT_LEAST_ONE_SEP({
+      SEP: sep,
+      DEF: () => {
+        rule();
+      }
+    });
 
+  const oneOrMore = (name: string, subRule: any, sep = Comma) =>
+    $.RULE(name, () => {
+      atLeastOne(() => $.CONSUME(subRule));
+    });
 
-export const oneOrMore = (name, subRule, sep = Comma) =>
-  $.RULE(name, () => {
-    atLeastOne(() => $.CONSUME(subRule))
-  });
+  const eitherOf = (name: string, ...rules: any[]) =>
+    $.RULE(name, () => {
+      $.OR(
+        rules.map(rule => ({
+          ALT: () => $.CONSUME(rule)
+        }))
+      );
+    });
 
-const eitherOf = (name, ...rules) => {
-  $.RULE("appDef", () => {
-    $.OR(rules.map(rule => { ALT: () => $.CONSUME(rule) })
-  });
+  return {
+    eitherOf,
+    atLeastOne,
+    oneOrMore,
+    createClauses,
+    createClause,
+    createScope,
+    anchorId
+  };
+};
 ```
 
-`AppMlParser.js`
+`AppMlParser.ts`
 
-```js
+```ts
 import { createClause, createDefClauses, oneOrMore } from "./parser-util";
 
 class AppMlParser extends Parser {
   constructor() {
     super(allTokens);
 
-    const $ = this;
+    const $: any = this;
+    const {
+      anchorId,
+      createScope,
+      oneOrMore,
+      eitherOf,
+      createClauses
+    } = createUtil($);
 
     $.RULE("appStatement", () => {
       $.CONSUME(Application);
       anchorId();
       // optional
       $.OPTION(() => {
-        $.SUBRULE($.appClause);
+        $.SUBRULE($.appScope);
       });
     });
 
-    createClause("appClause", $.appDefinitions);
-
-    oneOrMore("appDefitions", $.appDef);
-
+    createScope("appScope", $.appDefinitions);
     eitherOf("appDef", $.extendsClause, $.fieldsClause, $.domainsClause);
-
-    createDefClauses("extends", "fields", "domains");
+    oneOrMore("appDefitions", $.appDef);
+    createClauses("extends", "fields", "domains");
 
     this.performSelfAnalysis();
   }
@@ -246,22 +268,25 @@ class AppMlParser extends Parser {
 ### Usage
 
 ```js
-// ONLY ONCE
-const parser = new AppMlParser([]);
+import { AppMlLexer as Lexer } from "./lexer";
+import { AppMlParser as Parser } from "./parser";
 
-function parseInput(text) {
-  const lexingResult = AppMlLexer.tokenize(text);
+export { Lexer, Parser };
+
+// ONLY ONCE
+const parser: any = new Parser([]);
+
+export const parse = (text: string) => {
+  const lexingResult = Lexer.tokenize(text);
   // "input" is a setter which will reset the parser's state.
   parser.input = lexingResult.tokens;
-  parser.appStatement();
 
   if (parser.errors.length > 0) {
     throw new Error("sad sad panda, Parsing errors detected");
   }
-}
 
-const inputText = "application Webshop:test {}";
-parseInput(inputText);
+  return parser.appStatement();
+};
 ```
 
 ## CST

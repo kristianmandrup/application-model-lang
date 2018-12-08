@@ -9,13 +9,16 @@ The client services can use whatever language or library to listen for AST messa
 
 ## AST client service
 
-`FileWriter.js`
+`FileWriter.ts`
 
 ```js
 const _ = require("underscore.string");
 
 export class FileWriter {
-  constructor(config) {
+  config: any;
+  data: any;
+
+  constructor(config = {}) {
     this.configure(config);
   }
 
@@ -23,7 +26,7 @@ export class FileWriter {
     this.config = config;
   }
 
-  createFileContent(data = {}) {
+  createFileContent(data: any = {}) {
     return `// missing File content creator for: ${data.name}`;
   }
 
@@ -32,45 +35,52 @@ export class FileWriter {
     return this;
   }
 
-  dasherize(name) {
+  dasherize(name: string) {
     // without prefix -
     return _.dasherize(name).replace("-", "");
   }
 }
 ```
 
-`DomainFileWriter.js`
+`DomainFileWriter.ts`
 
 ```js
-export const createDomainFileWriter = (config) => new DomainFileWriter(config);
+import * as fs from "fs-extra";
+import * as path from "path";
+import { FileWriter } from "./FileWriter";
+
+export const createDomainFileWriter = (config: any = {}) =>
+  new DomainFileWriter(config);
 
 export class DomainFileWriter extends FileWriter {
-  constructor(config) {
-    super(config)
+  configured: any;
+
+  constructor(config = {}) {
+    super(config);
   }
 
-  modelName() {
-    return this.dasherize(this.data.name)
+  get modelName() {
+    return this.dasherize(this.data.name);
   }
 
   get defaults() {
-    const dirPath = path.join(this.config.projRoot, "models")
+    const dirPath = path.join(this.config.projRoot, "models");
     return {
       dirPath: () => dirPath,
-      filePath: () => path.join(dirPath, this.modelName());
-    }
+      filePath: () => path.join(dirPath, this.modelName())
+    };
   }
 
   get filePath() {
-    return this.configured.filePath() || this.defaults.filePath()
+    return this.configured.filePath() || this.defaults.filePath();
   }
 
   get fileContent() {
-    return this.createFileContent(this.data)
+    return this.createFileContent(this.data);
   }
 
   async writeFile() {
-    await fs.writeFile(this.filePath, this.fileContent)
+    await fs.writeFile(this.filePath, this.fileContent);
   }
 }
 ```
