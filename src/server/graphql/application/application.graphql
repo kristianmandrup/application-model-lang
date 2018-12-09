@@ -1,0 +1,17 @@
+"""
+A Application contains domains, with generic entities such as fields, validators etc. 
+that are available and can be (re)used across domain entities
+"""
+
+@Model
+type Application implements Entity {
+  id: ID!
+  name: String!
+  description: String
+  tags: [Tag]
+  createdAt: Date
+  updatedAt: Date
+  domains: [Domain]
+  fields: [Field]
+  validators: [Validator]
+}
