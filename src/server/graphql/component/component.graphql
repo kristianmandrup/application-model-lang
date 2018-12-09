@@ -1,0 +1,44 @@
+"""
+A Component renders a part of the screen
+"""
+
+@Model
+type Component implements Entity {
+  id: ID!
+  name: String!
+  description: String
+  tags: [Tag]
+  createdAt: Date
+  updatedAt: Date
+  props: [Prop]
+  states: [State]
+  renderers: [Render]
+}
+
+type Render implements Entity {
+  id: ID!
+  name: String!
+  description: String
+  tags: [Tag]
+  createdAt: Date
+  updatedAt: Date
+}
+
+type State implements Entity {
+  id: ID!
+  name: String!
+  description: String
+  tags: [Tag]
+  createdAt: Date
+  updatedAt: Date
+}
+
+type Prop implements Entity {
+  id: ID!
+  name: String!
+  type: FieldType
+  description: String
+  tags: [Tag]
+  createdAt: Date
+  updatedAt: Date
+}
