@@ -1,0 +1,26 @@
+enum FieldType {
+  STR
+  INT
+  FLOAT
+  BOOL
+  DATE
+  OBJ
+}
+
+"""
+A domain model field can be either
+- primitive
+- reference multiple models (one-to-many)
+- reference a single model (one-to-one)
+"""
+type Field implements Entity {
+  id: ID!
+  name: String!
+  description: String
+  tags: [Tag]
+  createdAt: Date
+  updatedAt: Date
+  extends: Field
+  type: FieldType
+  validators: [Validator]
+}

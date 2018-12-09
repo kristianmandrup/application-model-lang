@@ -9,7 +9,58 @@ type Form implements Entity {
   tags: [Tag]
   createdAt: Date
   updatedAt: Date
-  fields: [Field!]!
+  extends: Form
+  fields: [FormField!]!
   domain: Domain
   model: Model
+  actions: [Action]
+  triggers: [Trigger]
+}
+
+"""
+A domain model field can be either
+- primitive
+- reference multiple models (one-to-many)
+- reference a single model (one-to-one)
+"""
+type FormField implements Entity {
+  id: ID!
+  name: String!
+  description: String
+  tags: [Tag]
+  createdAt: Date
+  updatedAt: Date
+  extends: Field
+  type: FieldType
+  validators: [Validator]
+  component: String
+}
+
+
+type Action implements Entity {
+  id: ID!
+  name: String!
+  description: String
+  tags: [Tag]
+  createdAt: Date
+  updatedAt: Date
+  extends: Action
+  effects: [Effect]
+  triggers: [Trigger]
+  constraints: [Constraint]
+}
+
+type Effect {
+  name: String!
+  value: String!
+}
+
+type Trigger {
+  name: String!
+  value: String!
+}
+
+type Constraint {
+  name: String!
+  value: String!
 }

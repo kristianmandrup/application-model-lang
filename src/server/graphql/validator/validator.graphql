@@ -1,0 +1,50 @@
+type Validator implements Entity {
+  id: ID!
+  name: String!
+  description: String
+  tags: [Tag]
+  createdAt: Date
+  updatedAt: Date
+  extends: Validator
+  constraints: [Entry]
+}
+
+union Entry =
+    BoolEntry
+  | IntEntry
+  | FloatEntry
+  | StringEntry
+  | IntRangeEntry
+  | FloatRangeEntry
+
+type BoolEntry {
+  name: String
+  value: Boolean
+}
+
+type IntEntry {
+  name: String
+  value: Boolean
+}
+
+type FloatEntry {
+  name: String
+  value: Boolean
+}
+
+type StringEntry {
+  name: String
+  value: Boolean
+}
+
+type IntRangeEntry {
+  name: String
+  min: Int
+  max: Int
+}
+
+type FloatRangeEntry {
+  name: String
+  min: Float
+  max: Float
+}

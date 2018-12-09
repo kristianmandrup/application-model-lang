@@ -1,4 +1,4 @@
-type Entity {
+interface Entity {
   id: ID!
   name: String!
   description: String

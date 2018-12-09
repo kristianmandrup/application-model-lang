@@ -83,7 +83,7 @@ domain User {
     // for DB
     models: User
     forms, // implicit User
-    display
+    displays
 }
 ```
 
@@ -135,10 +135,8 @@ field acceptLegal {
     transient,
     type: string,
     render: <checkbox>,
-    validate: {
-        validators {
-            isChecked
-        }
+    validators {
+        isChecked
     }
 }
 ```
@@ -152,15 +150,13 @@ form User:create {
         confirmPassword,
         acceptLegal
     },
-    actions {
-        submit {
-            enable {
-                validated
-            }
+    constraints {
+        submit#enable {
+            validated
         }
     },
     triggers {
-        onCreate: setToken(self)
+        submit#onSuccess: setToken
     }
 }
 ```

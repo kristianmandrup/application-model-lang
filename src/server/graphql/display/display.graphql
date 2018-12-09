@@ -1,0 +1,49 @@
+"""
+A display renders a domain model
+"""
+
+
+@Model
+type Display implements Entity {
+  id: ID!
+  name: String!
+  description: String
+  tags: [Tag]
+  createdAt: Date
+  updatedAt: Date
+  domain: Domain
+  model: Model
+  single: SingleDisplay
+  multi: MultiDisplay
+}
+
+type SingleDisplay implements Entity {
+  id: ID!
+  name: String!
+  description: String
+  tags: [Tag]
+  createdAt: Date
+  updatedAt: Date
+  actions: [Action]
+  fields: DisplayField  
+}
+
+type MultiDisplay implements Entity {
+  pagination: Pagination
+  actions: [Action]  
+}
+
+type Pagination {
+  pageSize: Int
+}
+
+type DisplayField {
+  id: ID!
+  name: String!
+  description: String
+  tags: [Tag]
+  createdAt: Date
+  updatedAt: Date
+  component: String
+  field: Field
+}

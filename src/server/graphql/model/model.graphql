@@ -1,0 +1,43 @@
+"""
+A domain model can be either transient or persisted. 
+A domain model has a set of fields, each of which can be primitives or reference other models 
+"""
+@Model
+type Model implements Entity {
+  id: ID!
+  name: String!
+  description: String
+  tags: [Tag]
+  createdAt: Date
+  updatedAt: Date
+  fields: [ModelField!]!
+  referencedBy: [Model]
+}
+
+enum RefType {
+  NONE,
+  ONE,
+  MANY,
+}
+
+"""
+A domain model field can be either
+- primitive
+- reference multiple models (one-to-many)
+- reference a single model (one-to-one)
+"""
+type ModelField implements Entity {
+  id: ID!
+  name: String!
+  description: String
+  tags: [Tag]
+  createdAt: Date
+  updatedAt: Date
+  extends: ModelField  
+  transient: Boolean
+  type: FieldType
+  refType: RefType
+  models: [Model]
+  model: Model
+  validators: [Validator]
+}
