@@ -48,7 +48,7 @@ const RBrace = createToken({ name: "RBrace", pattern: /}/ });
 const LParens = createToken({ name: "LBrace", pattern: /\(/ });
 const RParens = createToken({ name: "RBrace", pattern: /\)/ });
 const Dot = createToken({ name: "Dot", pattern: /\./ });
-const Anchor = createToken({ name: "Anchor", pattern: /#/ });
+const Tag = createToken({ name: "Tag", pattern: /#/ });
 
 const Integer = createToken({ name: "Integer", pattern: /0|[1-9]\d*/ });
 
@@ -77,7 +77,7 @@ const allTokens = [
   LParens,
   RParens,
   Dot,
-  Anchor,
+  Tag,
   // The Identifier must appear after the keywords because all keywords are valid identifiers.
   Identifier,
   Integer
@@ -96,7 +96,7 @@ const tokenMap = {
   LParens,
   RParens,
   Dot,
-  Anchor,
+  Tag,
   // The Identifier must appear after the keywords because all keywords are valid identifiers.
   Identifier,
   Integer
@@ -154,7 +154,7 @@ The parser could look something like this...
 
 ```js
 import { tokenMap } from "../lexer";
-const { LCurly, RCurly, Comma, WhiteSpace, Identifier, Anchor } = tokenMap;
+const { LCurly, RCurly, Comma, WhiteSpace, Identifier, Tag } = tokenMap;
 
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
@@ -171,11 +171,11 @@ export const createUtil = ($: any) => {
     });
   };
 
-  const anchorId = () => {
+  const tagId = () => {
     $.CONSUME(Identifier);
-    // todo: optional Anchor
+    // todo: optional Tag
     $.OPTION(() => {
-      $.CONSUME(Anchor);
+      $.CONSUME(Tag);
       $.CONSUME(Identifier);
     });
   };
@@ -183,7 +183,7 @@ export const createUtil = ($: any) => {
   const createClause = (name: string, token: any) =>
     $.RULE(name, () => {
       $.CONSUME(token);
-      anchorId;
+      tagId;
     });
 
   // use convention to enable iteration over collection
@@ -223,7 +223,7 @@ export const createUtil = ($: any) => {
     createClauses,
     createClause,
     createScope,
-    anchorId
+    tagId
   };
 };
 ```
@@ -239,7 +239,7 @@ class AppMlParser extends Parser {
 
     const $: any = this;
     const {
-      anchorId,
+      tagId,
       createScope,
       oneOrMore,
       eitherOf,
@@ -248,7 +248,7 @@ class AppMlParser extends Parser {
 
     $.RULE("appStatement", () => {
       $.CONSUME(Application);
-      anchorId();
+      tagId();
       // optional
       $.OPTION(() => {
         $.SUBRULE($.appScope);

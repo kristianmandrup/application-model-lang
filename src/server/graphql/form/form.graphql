@@ -1,0 +1,15 @@
+"""
+A domain can have multiple forms to create or update each of its models
+"""
+@Model
+type Form implements Entity {
+  id: ID!
+  name: String!
+  description: String
+  tags: [Tag]
+  createdAt: Date
+  updatedAt: Date
+  fields: [Field!]!
+  domain: Domain
+  model: Model
+}

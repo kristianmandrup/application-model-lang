@@ -78,7 +78,7 @@ By combining and compose he variants of each to form new models.
 
 ### Example using extends and tags
 
-We can use _anchor id_ identifiers, such as `WebShop#test` to tag the application for the test context. We can add meta information using the `meta` object, which is available on any of the main types of application entities...
+We can use _tagId_ identifiers, such as `WebShop#test` to tag the application for the test context. We can add meta information using the `meta` object, which is available on any of the main types of application entities...
 
 ```
 application WebShop#test {
@@ -104,6 +104,51 @@ Pluggable MicroServices to process and output AST as files
 
 - [Chevrotain Parser Generator configuration](./docs/ParserGenerator.md)
 
+## GraphQL based development!
+
+What if your program was a graph? Wait, it is!
+
+We can send the nodes (such as `domain`, `application`, `model` etc) to a GraphQL server to act as central storage. We can then also have it store each version of each entity.
+
+When we render the app, we can take the latest of each entity name with a given tag.
+
+The GraphQL server can act as a central repository for all artifacts. Can be used for indiviaul developer (to query etc) and for the team as a whole via Subscriptions. Much better than github!
+
+```graphql
+type Entity {
+  id: ID!
+  name: String!
+  description: String
+  tags: [Tag]
+  createdAt: Date
+  updatedAt: Date
+}
+
+type Domain extends Entity {
+  models: [Model]
+  forms: [Form]
+}
+
+type Form extends Entity {
+  fields: [Field]
+}
+
+type Model extends Entity {
+  fields: [Field]
+}
+
+union FieldType = 'string' | 'int' | 'float' | 'date' | 'boolean'
+
+type Field extends Entity {
+  type: FieldType
+}
+
+type Application {
+  fields: [Field]
+  domains: [Domain]
+}
+```
+
 ## Developer bliss!!
 
 Each developer can develop the application models in his/her own preferred way, as the model development is completely decoupled from the writing of the application files.
@@ -116,7 +161,7 @@ When deployed to a server, the organisation can decide on a particular file outp
 
 Using a higher level language also means way less merge conflicts and lets developers work semlessly in a decoupled fashion. Each entity is completely decoupled and well structured by design. The AML contains the skeleton, the sidecar contains the application logic. Much like an interface and implementation. AML thus removes boilerplate from the equation!
 
-### Side car
+### Body
 
 The AML artifacts do not contain application logic, only function calls that are delegated/performed by the sidecar.
 
@@ -130,7 +175,7 @@ const React = require("react");
 export const getState = ({ initial, ctx }) => React.useState(initial);
 ```
 
-There are converters from js to most popular "compile to js" languages, so it is a good lingua franca.
+There are converters from js to many popular "compile to js" languages, so it is a good lingua franca.
 
 - [jeason: js to reason](https://github.com/chenglou/jeason)
 - ...
@@ -141,12 +186,12 @@ The exported functions in `user-model.js` are called by the compiled
 /domains
   /user
     UserModel.reason
-    UserModel_Sidecar.reason
+    UserModel_Body.reason
     user-model.js
 
 ```
 
-`UserModel_Sidecar.reason`
+`UserModel_Body.reason`
 
 With external binding to `user-model.js` file
 
@@ -157,7 +202,7 @@ let getState = (~initial, ~ctx) => /* ... /*
 `UserModel.reason`
 
 ```reason
-open UserModelSideCar;
+open UserModel_Body;
 
 module Counter = {
   let component = ReasonReact.component("Counter");

@@ -11,28 +11,31 @@ The project needs to have a config file which lists the services to be used and 
 
 `aml-services.json`
 
-```json
-{
-  "services": {
-    "typeorm": {
-      "location": "@aml/reason-typeorm-service",
-      "templates": "default"
-    },
+```js
+module.export = {
+  services: {
     "reason-react": {
-      "location": "./aml/services/my-reason-react"
-      // implicit "templates": "default"
+      location: "./aml/services/my-reason-react"
     },
     "reason-graphql": {
-      "location": "@aml/reason-graphql-service",
-      "templates": "./aml/templates/reason-graphql-service",
-      "structure": "./aml/structure/graphql"
+      location: "@aml/reason-graphql-service",
+      templates: "default",
+      structure: "./aml/structure/graphql"
+    },
+    "reason-domain": {
+      location: "@aml/reason-domain-service",
+      templates: "default",
+      structure: "./aml/structure/domain"
     }
   },
-  "settings": {
-    "transport": "websockets",
-    "port": "6226"
+  settings: {
+    projectRoot: path.join("../../", __dirname),
+    services: {
+      transport: "websockets",
+      port: "6226"
+    }
   }
-}
+};
 ```
 
 Note that each service can take configurations such as:

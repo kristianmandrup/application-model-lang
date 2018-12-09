@@ -1,0 +1,16 @@
+"""
+A domain such as Person has one or more models and multiple forms to interact with the model
+Example: Person can have Contact and Person, where Contact is a transitive 
+(in-memory, not persistant) model and Person is a persisted model
+"""
+@Model
+type Domain implements Entity {
+  id: ID!
+  name: String!
+  description: String
+  tags: [Tag]
+  createdAt: Date
+  updatedAt: Date
+  models: [Models]
+  forms: [Form]
+}

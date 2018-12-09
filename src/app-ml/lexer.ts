@@ -36,7 +36,7 @@ const Domains = createToken({
 // ...
 
 const Dot = createToken({ name: "Dot", pattern: /\./ });
-const Anchor = createToken({ name: "Anchor", pattern: /#/ });
+const Tag = createToken({ name: "Tag", pattern: /#/ });
 
 const StringLiteral = createToken({
   name: "StringLiteral",
@@ -67,7 +67,7 @@ export const tokens = [
   Null,
   Identifier,
   Dot,
-  Anchor,
+  Tag,
   Application,
   Extends,
   Domains,
@@ -89,7 +89,7 @@ export const tokenMap: any = {
   Null,
   Identifier,
   Dot,
-  Anchor,
+  Tag,
   Application,
   Extends,
   Domains,

@@ -17,7 +17,7 @@ const {
   Null,
   // Identifier,
   // Dot,
-  // Anchor,
+  // Tag,
   Application
   // Extends,
   // Domains,
@@ -35,7 +35,7 @@ export class AppMlParser extends Parser {
 
     const $: any = this;
     const {
-      anchorId,
+      tagId,
       createScope,
       oneOrMore,
       eitherOf,
@@ -44,7 +44,7 @@ export class AppMlParser extends Parser {
 
     $.RULE("appStatement", () => {
       $.CONSUME(Application);
-      anchorId();
+      tagId();
       // optional
       $.OPTION(() => {
         $.SUBRULE($.appScope);

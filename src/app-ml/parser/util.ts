@@ -1,5 +1,5 @@
 import { tokenMap } from "../lexer";
-const { LCurly, RCurly, Comma, WhiteSpace, Identifier, Anchor } = tokenMap;
+const { LCurly, RCurly, Comma, WhiteSpace, Identifier, Tag } = tokenMap;
 
 const capitalize = (str: string) => str.charAt(0).toUpperCase() + str.slice(1);
 
@@ -16,11 +16,11 @@ export const createUtil = ($: any) => {
     });
   };
 
-  const anchorId = () => {
+  const tagId = () => {
     $.CONSUME(Identifier);
-    // todo: optional Anchor
+    // todo: optional Tag
     $.OPTION(() => {
-      $.CONSUME(Anchor);
+      $.CONSUME(Tag);
       $.CONSUME(Identifier);
     });
   };
@@ -28,7 +28,7 @@ export const createUtil = ($: any) => {
   const createClause = (name: string, token: any) =>
     $.RULE(name, () => {
       $.CONSUME(token);
-      anchorId;
+      tagId;
     });
 
   // use convention to enable iteration over collection
@@ -68,6 +68,6 @@ export const createUtil = ($: any) => {
     createClauses,
     createClause,
     createScope,
-    anchorId
+    tagId
   };
 };
